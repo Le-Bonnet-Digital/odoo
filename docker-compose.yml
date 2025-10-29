@@ -2,8 +2,6 @@ services:
   db:
     image: postgres:15
     container_name: odoo-db
-    env_file:
-      - .env
     environment:
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
@@ -19,15 +17,21 @@ services:
     container_name: odoo18
     depends_on:
       - db
-    env_file:
-      - .env
+    # Pass DB and logging parameters explicitly so env vars are honored
+    # and logs are emitted to stdout (visible via `docker compose logs`).
+    command: >-
+      --db_host=${ODOO_DB_HOST}
+      --db_port=${ODOO_DB_PORT}
+      --db_user=${ODOO_DB_USER}
+      --db_password=${ODOO_DB_PASSWORD}
+      -d ${ODOO_DB_NAME}
+      --logfile=-
     environment:
       DB_HOST: ${ODOO_DB_HOST}
       DB_PORT: ${ODOO_DB_PORT}
       DB_USER: ${ODOO_DB_USER}
       DB_PASSWORD: ${ODOO_DB_PASSWORD}
       DB_NAME: ${ODOO_DB_NAME}
-      ADMIN_PASSWORD: ${ODOO_ADMIN_PASSWORD}
     ports:
       - "8069:8069"
     volumes:
